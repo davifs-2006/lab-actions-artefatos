@@ -3,3 +3,4 @@ O passárinho
 Voando
 Aqui
 Bem rapidinho
+No canto
