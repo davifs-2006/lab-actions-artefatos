@@ -1,0 +1,53 @@
+name: Pipeline Inteligente de Artefatos
+
+on:
+  # Regra 1: Permite execução manual
+  workflow_dispatch:
+
+  # Regra 2: Agendamento diário às 02:00 AM (Cron: Minutos Horas Dia Mês Dia_da_Semana)
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Regras 3 e 4: Filtros de Push
+  push:
+    branches:
+      - 'feature/**' # Roda apenas em branches que começam com feature/
+    paths:
+      - 'src/**'     # Monitora a pasta src/
+      - '!src/docs/**' # EXCEÇÃO: Ignora se a alteração for APENAS em src/docs/
+
+jobs:
+  job_gerador:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Simular Build e Relatórios
+        run: |
+          mkdir saida_build
+          echo "Relatorio de Testes 1: Sucesso" > saida_build/relatorio1.txt
+          echo "Relatorio de Erros 2: Nenhum erro encontrado" > saida_build/relatorio2.txt
+          echo "Pasta de build criada com arquivos simulados."
+
+      - name: Upload de Artefatos (Pendrive Virtual)
+        uses: actions/upload-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+          path: saida_build/
+
+    job_auditoria:
+    runs-on: ubuntu-latest
+    needs: job_gerador # Garante que o Job 1 termine antes deste começar
+    steps:
+      - name: Download de Artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+
+      - name: Validar Sobrevivência dos Arquivos
+        run: |
+          echo "Listando arquivos baixados:"
+          ls -R
+          echo "--- Conteúdo do Relatório 1 ---"
+          cat relatorio1.txt
